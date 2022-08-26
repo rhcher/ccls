@@ -371,7 +371,7 @@ void buildItem(const CodeCompletionResult &r, const CodeCompletionString &ccs,
           continue;
         }
         out[i].textEdit.newText +=
-            ("${" + Twine(out[i].parameters_.size()) + ":" + text + "}").str();
+            ("${" + llvm::Twine(out[i].parameters_.size()) + ":" + text + "}").str();
         out[i].insertTextFormat = InsertTextFormat::Snippet;
       } else if (kind != CodeCompletionString::CK_Informative) {
         out[i].textEdit.newText += text;

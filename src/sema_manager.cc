@@ -136,7 +136,7 @@ using IncludeStructure = std::vector<std::pair<std::string, int64_t>>;
 struct PreambleStatCache {
   llvm::StringMap<ErrorOr<llvm::vfs::Status>> cache;
 
-  void update(Twine path, ErrorOr<llvm::vfs::Status> s) {
+  void update(llvm::Twine path, ErrorOr<llvm::vfs::Status> s) {
     cache.try_emplace(path.str(), std::move(s));
   }
 
@@ -149,14 +149,14 @@ struct PreambleStatCache {
           PreambleStatCache &cache)
           : ProxyFileSystem(std::move(fs)), cache(cache) {}
       llvm::ErrorOr<std::unique_ptr<llvm::vfs::File>>
-      openFileForRead(const Twine &path) override {
+      openFileForRead(const llvm::Twine &path) override {
         auto file = getUnderlyingFS().openFileForRead(path);
         if (!file || !*file)
           return file;
         cache.update(path, file->get()->status());
         return file;
       }
-      llvm::ErrorOr<llvm::vfs::Status> status(const Twine &path) override {
+      llvm::ErrorOr<llvm::vfs::Status> status(const llvm::Twine &path) override {
         auto s = getUnderlyingFS().status(path);
         cache.update(path, s);
         return s;
@@ -172,7 +172,7 @@ struct PreambleStatCache {
       VFS(IntrusiveRefCntPtr<llvm::vfs::FileSystem> fs,
           const PreambleStatCache &cache)
           : ProxyFileSystem(std::move(fs)), cache(cache) {}
-      llvm::ErrorOr<llvm::vfs::Status> status(const Twine &path) override {
+      llvm::ErrorOr<llvm::vfs::Status> status(const llvm::Twine &path) override {
         auto i = cache.cache.find(path.str());
         if (i != cache.cache.end())
           return i->getValue();

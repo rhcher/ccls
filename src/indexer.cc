@@ -613,11 +613,11 @@ public:
       if (l.isMacroID() || !sm.isBeforeInTranslationUnit(l, sr.getBegin()))
         return;
       llvm::StringRef buf = getSourceInRange(sm, lang, sr);
-      Twine init = buf.count('\n') <= g_config->index.maxInitializerLines - 1
-                       ? buf.size() && buf[0] == ':' ? Twine(" ", buf)
-                                                     : Twine(" = ", buf)
-                       : Twine();
-      Twine t = def.detailed_name + init;
+      llvm::Twine init = buf.count('\n') <= g_config->index.maxInitializerLines - 1
+                       ? buf.size() && buf[0] == ':' ? llvm::Twine(" ", buf)
+                                                     : llvm::Twine(" = ", buf)
+                       : llvm::Twine();
+      llvm::Twine t = def.detailed_name + init;
       def.hover =
           def.storage == SC_Static && strncmp(def.detailed_name, "static ", 7)
               ? intern(("static " + t).str())
@@ -1141,8 +1141,8 @@ public:
         llvm::StringRef buf = getSourceInRange(sm, lang, sr);
         var.def.hover =
             intern(buf.count('\n') <= g_config->index.maxInitializerLines - 1
-                       ? Twine("#define ", getSourceInRange(sm, lang, sr)).str()
-                       : Twine("#define ", name).str());
+                       ? llvm::Twine("#define ", getSourceInRange(sm, lang, sr)).str()
+                       : llvm::Twine("#define ", name).str());
       }
     }
   }
