@@ -12,7 +12,7 @@ namespace ccls {
 using namespace clang;
 
 namespace {
-llvm::Expected<tooling::Replacements> formatCode(StringRef code, StringRef file,
+llvm::Expected<tooling::Replacements> formatCode(llvm::StringRef code, llvm::StringRef file,
                                                  tooling::Range range) {
   auto style = format::getStyle("file", file, "LLVM", code, nullptr);
   if (!style)
@@ -57,8 +57,8 @@ std::vector<TextEdit> replacementsToEdits(std::string_view code,
 void format(ReplyOnce &reply, WorkingFile *wfile, tooling::Range range) {
   std::string_view code = wfile->buffer_content;
   auto replsOrErr = formatCode(
-      StringRef(code.data(), code.size()),
-      StringRef(wfile->filename.data(), wfile->filename.size()), range);
+      llvm::StringRef(code.data(), code.size()),
+      llvm::StringRef(wfile->filename.data(), wfile->filename.size()), range);
   if (replsOrErr)
     reply(replacementsToEdits(code, *replsOrErr));
   else

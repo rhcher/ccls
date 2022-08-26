@@ -335,7 +335,7 @@ void buildItem(const CodeCompletionResult &r, const CodeCompletionString &ccs,
         out[i].parameters_.push_back(text);
       break;
     case CodeCompletionString::CK_Informative:
-      if (StringRef(chunk.Text).endswith("::"))
+      if (llvm::StringRef(chunk.Text).endswith("::"))
         continue;
       text = chunk.Text;
       break;
@@ -509,7 +509,7 @@ void MessageHandler::textDocument_completion(CompletionParam &param,
 
   clang::CodeCompleteOptions ccOpts;
   ccOpts.IncludeBriefComments = true;
-  ccOpts.IncludeCodePatterns = StringRef(buffer_line).ltrim().startswith("#");
+  ccOpts.IncludeCodePatterns = llvm::StringRef(buffer_line).ltrim().startswith("#");
   ccOpts.IncludeFixIts = true;
   ccOpts.IncludeMacros = true;
 

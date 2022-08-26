@@ -85,7 +85,7 @@ struct ProjectProcessor {
         LOG_S(WARNING) << toString(glob_or_err.takeError());
   }
 
-  bool excludesArg(StringRef arg, int &i) {
+  bool excludesArg(llvm::StringRef arg, int &i) {
     if (arg.startswith("-M")) {
       if (arg == "-MF" || arg == "-MT" || arg == "-MQ")
         i++;
@@ -107,7 +107,7 @@ struct ProjectProcessor {
     auto [lang, header] = lookupExtension(entry.filename);
     for (int i = entry.compdb_size; i < entry.args.size(); i++) {
       const char *arg = entry.args[i];
-      StringRef a(arg);
+      llvm::StringRef a(arg);
       if (a[0] == '%') {
         bool ok = false;
         for (;;) {
@@ -235,7 +235,7 @@ readCompilerArgumentsFromFile(const std::string &path) {
 }
 
 bool appendToCDB(const std::vector<const char *> &args) {
-  return args.size() && StringRef("%compile_commands.json") == args[0];
+  return args.size() && llvm::StringRef("%compile_commands.json") == args[0];
 }
 
 std::vector<const char *> getFallback(const std::string &path) {
@@ -392,9 +392,9 @@ void Project::loadDirectory(const std::string &root, Project::Folder &folder) {
       fwrite(input.c_str(), input.size(), 1, fout);
       fclose(fout);
     }
-    std::array<Optional<StringRef>, 3> redir{StringRef(stdinPath),
-                                             StringRef(path), StringRef()};
-    std::vector<StringRef> args{g_config->compilationDatabaseCommand, root};
+    std::array<Optional<llvm::StringRef>, 3> redir{llvm::StringRef(stdinPath),
+                                             llvm::StringRef(path), llvm::StringRef()};
+    std::vector<llvm::StringRef> args{g_config->compilationDatabaseCommand, root};
     if (sys::ExecuteAndWait(args[0], args, llvm::None, redir, 0, 0, &err_msg) <
         0) {
       LOG_S(ERROR) << "failed to execute " << args[0].str() << " "
@@ -496,10 +496,10 @@ Project::Entry Project::findEntry(const std::string &path, bool can_redirect,
   std::lock_guard lock(mtx);
 
   for (auto &[root, folder] : root2folder)
-    if (StringRef(path).startswith(root)) {
+    if (llvm::StringRef(path).startswith(root)) {
       // Find the best-fit .ccls
       for (auto &[dir, args] : folder.dot_ccls)
-        if (StringRef(path).startswith(dir) &&
+        if (llvm::StringRef(path).startswith(dir) &&
             dir.length() > best_dot_ccls_dir.length()) {
           best_dot_ccls_root = root;
           best_dot_ccls_folder = &folder;
@@ -545,7 +545,7 @@ Project::Entry Project::findEntry(const std::string &path, bool can_redirect,
       int best_score = INT_MIN;
       auto [lang, header] = lookupExtension(path);
       for (auto &[root, folder] : root2folder)
-        if (StringRef(path).startswith(root))
+        if (llvm::StringRef(path).startswith(root))
           for (const Entry &e : folder.entries)
             if (e.compdb_size) {
               int score = computeGuessScore(path, e.filename);
@@ -633,13 +633,13 @@ void Project::index(WorkingFiles *wfiles, const RequestId &id) {
 void Project::indexRelated(const std::string &path) {
   auto &gi = g_config->index;
   GroupMatch match(gi.whitelist, gi.blacklist);
-  StringRef stem = sys::path::stem(path);
+  llvm::StringRef stem = sys::path::stem(path);
   std::vector<const char *> args, extra_args;
   for (const std::string &arg : g_config->clang.extraArgs)
     extra_args.push_back(intern(arg));
   std::lock_guard lock(mtx);
   for (auto &[root, folder] : root2folder)
-    if (StringRef(path).startswith(root)) {
+    if (llvm::StringRef(path).startswith(root)) {
       for (const Project::Entry &entry : folder.entries) {
         std::string reason;
         args = entry.args;

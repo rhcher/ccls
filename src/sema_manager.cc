@@ -237,14 +237,14 @@ public:
   StoreInclude(const SourceManager &sm, IncludeStructure &out)
       : sm(sm), out(out) {}
   void InclusionDirective(SourceLocation hashLoc, const Token &includeTok,
-                          StringRef fileName, bool isAngled,
+                          llvm::StringRef fileName, bool isAngled,
                           CharSourceRange filenameRange,
 #if LLVM_VERSION_MAJOR >= 15 // llvmorg-15-init-7692-gd79ad2f1dbc2
                           llvm::Optional<FileEntryRef> fileRef,
 #else
                           const FileEntry *file,
 #endif
-                          StringRef searchPath, StringRef relativePath,
+                          llvm::StringRef searchPath, StringRef relativePath,
                           const clang::Module *imported,
                           SrcMgr::CharacteristicKind fileKind) override {
     (void)sm;
@@ -310,7 +310,7 @@ public:
     if (!l.isValid())
       return;
     const SourceManager &sm = info.getSourceManager();
-    StringRef filename = sm.getFilename(info.getLocation());
+    llvm::StringRef filename = sm.getFilename(info.getLocation());
     bool concerned = isInsideMainFile(sm, l);
     auto fillDiagBase = [&](DiagBase &d) {
       llvm::SmallString<64> message;

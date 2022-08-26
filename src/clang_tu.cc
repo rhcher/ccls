@@ -50,9 +50,9 @@ static Pos decomposed2LineAndCol(const SourceManager &sm,
   int l = (int)sm.getLineNumber(i.first, i.second) - 1,
       c = (int)sm.getColumnNumber(i.first, i.second) - 1;
   bool invalid = false;
-  StringRef buf = sm.getBufferData(i.first, &invalid);
+  llvm::StringRef buf = sm.getBufferData(i.first, &invalid);
   if (!invalid) {
-    StringRef p = buf.substr(i.second - c, c);
+    llvm::StringRef p = buf.substr(i.second - c, c);
     c = 0;
     for (size_t i = 0; i < p.size();)
       if (c++, (uint8_t)p[i++] >= 128)
@@ -144,7 +144,7 @@ buildCompilerInvocation(const std::string &main, std::vector<const char *> args,
     return nullptr;
 
   const driver::Command &cmd = cast<driver::Command>(*jobs.begin());
-  if (StringRef(cmd.getCreator().getName()) != "clang")
+  if (llvm::StringRef(cmd.getCreator().getName()) != "clang")
     return nullptr;
   const llvm::opt::ArgStringList &cc_args = cmd.getArguments();
   auto ci = std::make_unique<CompilerInvocation>();

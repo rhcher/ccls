@@ -246,7 +246,7 @@ void WorkingFile::computeLineMapping() {
 
   // For index line i, set index_to_buffer[i] to -1 if line i is duplicated.
   int i = 0;
-  for (StringRef line : index_lines) {
+  for (llvm::StringRef line : index_lines) {
     uint64_t h = hashUsr(line);
     auto it = hash_to_unique.find(h);
     if (it == hash_to_unique.end()) {
@@ -263,7 +263,7 @@ void WorkingFile::computeLineMapping() {
   // For buffer line i, set buffer_to_index[i] to -1 if line i is duplicated.
   i = 0;
   hash_to_unique.clear();
-  for (StringRef line : buffer_lines) {
+  for (llvm::StringRef line : buffer_lines) {
     uint64_t h = hashUsr(line);
     auto it = hash_to_unique.find(h);
     if (it == hash_to_unique.end()) {

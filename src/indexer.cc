@@ -93,13 +93,13 @@ struct IndexParam {
   }
 };
 
-StringRef getSourceInRange(const SourceManager &sm, const LangOptions &langOpts,
+llvm::StringRef getSourceInRange(const SourceManager &sm, const LangOptions &langOpts,
                            SourceRange sr) {
   SourceLocation bloc = sr.getBegin(), eLoc = sr.getEnd();
   std::pair<FileID, unsigned> bInfo = sm.getDecomposedLoc(bloc),
                               eInfo = sm.getDecomposedLoc(eLoc);
   bool invalid = false;
-  StringRef buf = sm.getBufferData(bInfo.first, &invalid);
+  llvm::StringRef buf = sm.getBufferData(bInfo.first, &invalid);
   if (invalid)
     return "";
   return buf.substr(bInfo.second,
@@ -413,7 +413,7 @@ public:
     const RawComment *rc = ctx->getRawCommentForAnyRedecl(d);
     if (!rc)
       return "";
-    StringRef raw = rc->getRawText(ctx->getSourceManager());
+    llvm::StringRef raw = rc->getRawText(ctx->getSourceManager());
     SourceRange sr = rc->getSourceRange();
     std::pair<FileID, unsigned> bInfo = sm.getDecomposedLoc(sr.getBegin());
     unsigned start_column = sm.getLineNumber(bInfo.first, bInfo.second);
@@ -457,7 +457,7 @@ public:
     }
     while (ret.size() && isspace(ret.back()))
       ret.pop_back();
-    if (StringRef(ret).endswith("*/") || StringRef(ret).endswith("\n/"))
+    if (llvm::StringRef(ret).endswith("*/") || llvm::StringRef(ret).endswith("\n/"))
       ret.resize(ret.size() - 2);
     while (ret.size() && isspace(ret.back()))
       ret.pop_back();
@@ -599,7 +599,7 @@ public:
       def.qual_name_offset = str.size();
       def.short_name_offset = str.size() + qualified.size() - short_name.size();
       def.short_name_size = short_name.size();
-      str += StringRef(qualified.data(), qualified.size());
+      str += llvm::StringRef(qualified.data(), qualified.size());
       def.detailed_name = intern(str);
     } else {
       setName(d, short_name, qualified, def);
@@ -612,7 +612,7 @@ public:
       SourceLocation l = d->getLocation();
       if (l.isMacroID() || !sm.isBeforeInTranslationUnit(l, sr.getBegin()))
         return;
-      StringRef buf = getSourceInRange(sm, lang, sr);
+      llvm::StringRef buf = getSourceInRange(sm, lang, sr);
       Twine init = buf.count('\n') <= g_config->index.maxInitializerLines - 1
                        ? buf.size() && buf[0] == ':' ? Twine(" ", buf)
                                                      : Twine(" = ", buf)
@@ -961,7 +961,7 @@ public:
     case Decl::Record:
       if (auto *tag_d = dyn_cast<TagDecl>(d)) {
         if (type->def.detailed_name[0] == '\0' && info->short_name.empty()) {
-          StringRef tag;
+          llvm::StringRef tag;
           switch (tag_d->getTagKind()) {
           case TTK_Struct:
             tag = "struct";
@@ -980,7 +980,7 @@ public:
             break;
           }
           if (TypedefNameDecl *td = tag_d->getTypedefNameForAnonDecl()) {
-            StringRef name = td->getName();
+            llvm::StringRef name = td->getName();
             std::string detailed = ("anon " + tag + " " + name).str();
             type->def.detailed_name = intern(detailed);
             type->def.short_name_size = detailed.size();
@@ -1079,8 +1079,8 @@ class IndexPPCallbacks : public PPCallbacks {
   SourceManager &sm;
   IndexParam &param;
 
-  std::pair<StringRef, Usr> getMacro(const Token &tok) const {
-    StringRef name = tok.getIdentifierInfo()->getName();
+  std::pair<llvm::StringRef, Usr> getMacro(const Token &tok) const {
+    llvm::StringRef name = tok.getIdentifierInfo()->getName();
     SmallString<256> usr("@macro@");
     usr += name;
     return {name, hashUsr(usr)};
@@ -1095,14 +1095,14 @@ public:
       (void)param.consumeFile(sm.getFileID(sl));
   }
   void InclusionDirective(SourceLocation hashLoc, const Token &tok,
-                          StringRef included, bool isAngled,
+                          llvm::StringRef included, bool isAngled,
                           CharSourceRange filenameRange,
 #if LLVM_VERSION_MAJOR >= 15 // llvmorg-15-init-7692-gd79ad2f1dbc2
                           llvm::Optional<FileEntryRef> fileRef,
 #else
                           const FileEntry *file,
 #endif
-                          StringRef searchPath, StringRef relativePath,
+                          llvm::StringRef searchPath, llvm::StringRef relativePath,
                           const Module *imported,
                           SrcMgr::CharacteristicKind fileType) override {
 #if LLVM_VERSION_MAJOR >= 15 // llvmorg-15-init-7692-gd79ad2f1dbc2
@@ -1138,7 +1138,7 @@ public:
       if (var.def.detailed_name[0] == '\0') {
         var.def.detailed_name = intern(name);
         var.def.short_name_size = name.size();
-        StringRef buf = getSourceInRange(sm, lang, sr);
+        llvm::StringRef buf = getSourceInRange(sm, lang, sr);
         var.def.hover =
             intern(buf.count('\n') <= g_config->index.maxInitializerLines - 1
                        ? Twine("#define ", getSourceInRange(sm, lang, sr)).str()
@@ -1186,7 +1186,7 @@ public:
       : dataConsumer(std::move(dataConsumer)), indexOpts(indexOpts),
         param(param) {}
   std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &ci,
-                                                 StringRef inFile) override {
+                                                 llvm::StringRef inFile) override {
     class SkipProcessed : public ASTConsumer {
       IndexParam &param;
       const ASTContext *ctx = nullptr;
