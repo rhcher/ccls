@@ -239,8 +239,8 @@ public:
   void InclusionDirective(SourceLocation hashLoc, const Token &includeTok,
                           llvm::StringRef fileName, bool isAngled,
                           CharSourceRange filenameRange,
-#if LLVM_VERSION_MAJOR >= 16 // llvmorg-16-init-14884-g8f0df9f3bbc6
-                          std::optional<FileEntryRef> fileRef,
+#if LLVM_VERSION_MAJOR >= 16 // llvmorg-16-init-15080-g854c10f8d185
+                          OptionalFileEntryRef fileRef,
 #elif LLVM_VERSION_MAJOR >= 15 // llvmorg-15-init-7692-gd79ad2f1dbc2
                           llvm::Optional<FileEntryRef> fileRef,
 #else
